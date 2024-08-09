@@ -11,7 +11,8 @@ import { validateSchema } from '../middlewares/validateSchema';
 import { loginUser, registerUser, validarToken } from '../controller/auth.controller';
 import { deleteUser, getManyUsers, getOneUser, updateUser } from '../controller/user.controller';
 import { getInterest, getTypeInterest, getUserInterest, registerInterest } from '../controller/interests.controller';
-import { createLike, getLikes, checkLikeExists } from '../controller/like.controller';  // Importa el nuevo controlador
+import { createLike, getLikes, checkLikeExists } from '../controller/like.controller'; 
+import { createConversation, getConversations, sendMessage, getMessages } from '../controller/conversation.controller';
 
 // Schemas
 import { UserLoginSchema, UserRegisterSchema } from '../schemas/UserSchema';
@@ -58,9 +59,22 @@ router.route('/likes')
   .all(authToken)
   .get(getLikes);
 
-router.route('/likes/check')  // Nueva ruta para verificar si existe un like
+router.route('/likes/check')  
   .all(authToken)
-  .get(checkLikeExists);  // Añade el controlador para la nueva ruta
+  .get(checkLikeExists);  
+
+router.route('/conversation')
+  .all(authToken)
+  .post(createConversation)
+  .get(getConversations); // Esta ruta ya debería proporcionar las conversaciones con el último mensaje
+
+router.route('/conversation/:conversationId/messages')
+  .all(authToken)
+  .get(getMessages);
+
+router.route('/message')
+  .all(authToken)
+  .post(sendMessage);
 
 // Exportación del Modulo
 export default router;

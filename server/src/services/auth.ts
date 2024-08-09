@@ -5,13 +5,11 @@ import { MAIN_DB_PREFIX } from '../keys';
 import conn from '../db';
 
 /**
- * Obtiene un solo usuario de la base de datos.
  *
  * @param  userSearch Identificador unico
  * @returns Usuario extraido de la base de datos
  */
 export const findOneBy = async ({ email, username }: UserSearch) => {
-  // Crear la sentencia SQL
   const SQL = `
     SELECT id, password FROM ${MAIN_DB_PREFIX}tr_user WHERE (username = ? OR email = ?) AND is_active=1;
   `;
@@ -22,7 +20,6 @@ export const findOneBy = async ({ email, username }: UserSearch) => {
 };
 
 export const createOne = async ({ fullname, username, email, password, birthday }: UserCreate) => {
-  // Genero mi consulta SQL
   const SQL = `
     INSERT INTO ${MAIN_DB_PREFIX}tr_user (full_name, username,email,password,date_of_birthday)
     VALUES (?,?,?,?,?);
@@ -32,7 +29,6 @@ export const createOne = async ({ fullname, username, email, password, birthday 
   (id_user, id_gender, bio, location, url_photo) VALUES 
   (?,?,?,?,?);`;
 
-  // Encripto la contraseña del usuario
   const newPassword = await encryptPass(password);
   const formatBirthday = format(birthday, 'YYYY-MM-DD', 'en');
 

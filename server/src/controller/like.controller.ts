@@ -1,7 +1,6 @@
-// like.controller.ts
 
 import { Request, Response } from 'express';
-import { createLikeService, getLikesService, checkLikeExistsService } from '../services/likes'; // Importa el nuevo servicio
+import { createLikeService, getLikesService, checkLikeExistsService } from '../services/likes'; 
 
 export async function createLike(req: Request, res: Response) {
     const userId = Number(req.user.id);  
@@ -11,7 +10,6 @@ export async function createLike(req: Request, res: Response) {
         return res.status(400).json({ message: "User to like is required and must be a number" });
     }
 
-    // Verifica si el like ya existe antes de crearlo
     const likeExists = await checkLikeExistsService(userId, likedUserId);
 
     if (likeExists) {

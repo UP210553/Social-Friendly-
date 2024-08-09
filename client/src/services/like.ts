@@ -1,4 +1,3 @@
-// like.ts
 
 import { getToken } from './localStorage';
 
@@ -7,10 +6,11 @@ const BASE_URL = new URL('http://localhost:3000/api/');
 export const createLike = async (userId: string | number, likedUserId: string | number) => {
   const LIKE_URL = new URL('like', BASE_URL);
 
-  // Verificar si el like ya existe antes de crear uno nuevo
   const existsUrl = new URL('likes/check', BASE_URL);
   existsUrl.searchParams.append('userId', userId.toString());
   existsUrl.searchParams.append('likedUserId', likedUserId.toString());
+
+
 
   const checkResp = await fetch(existsUrl.toString(), {
     method: 'GET',
@@ -32,7 +32,6 @@ export const createLike = async (userId: string | number, likedUserId: string | 
     throw new Error("Ya has dado like a este usuario.");
   }
 
-  // Crear el like si no existe
   const resp = await fetch(LIKE_URL.toString(), {
     method: 'POST',
     headers: {

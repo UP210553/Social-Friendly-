@@ -1,3 +1,4 @@
+// App.tsx
 import { Routes, Route } from 'react-router-dom';
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -6,8 +7,10 @@ import Navbar from './components/Navbar';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import useAuth from './hooks/useAuth';
 import PerfilUsuario from './pages/PerfilUsuario';
-import { ToastContainer, toast } from 'react-toastify'; // Importar ToastContainer y toast
-import 'react-toastify/dist/ReactToastify.css'; // Estilos por defecto
+import ConversationPage from './pages/Conversation';
+import { ToastContainer, toast } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
   const { isAuth } = useAuth();
@@ -29,6 +32,11 @@ function App() {
               <PerfilUsuario />
             </ProtectedRoutes>
           } />
+          <Route path='conversation/:conversationId' element={
+            <ProtectedRoutes restrict={!isAuth} redirectTo='/login'>
+              <ConversationPage />
+            </ProtectedRoutes>
+          } />
           <Route element={<ProtectedRoutes restrict={isAuth} redirectTo='/' />}>
             <Route path='login' element={<Login />} />
             <Route path='register' element={<Register />} />
@@ -36,7 +44,6 @@ function App() {
           <Route path='*' element={<h1>Not Found!!!!</h1>} />
         </Routes>
       </main>
-      {/* Agregar ToastContainer aquí */}
       <ToastContainer
         position="top-right"
         autoClose={5000}

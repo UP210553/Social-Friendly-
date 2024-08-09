@@ -1,18 +1,24 @@
+// components/TinderCarousel.tsx
 import React, { useEffect, useState } from "react";
 import { Carousel } from 'react-bootstrap';
 import { User } from "./PerfilUsuario";
 import { getManyUsers } from "../services/users";
-import { createLike } from "../services/like"; // Importa la función createLike
+import { createLike, getLikes } from "../services/like";
+import { createConversation } from "../services/conversation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { toast } from 'react-toastify'; // Importar toast
-import 'react-toastify/dist/ReactToastify.css'; // Importar estilos de react-toastify
-import { getToken } from '../services/localStorage'; // Asegúrate de tener una función para obtener el token del usuario actual
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { getToken } from '../services/localStorage';
+import { useNavigate } from 'react-router-dom';
 
 const TinderCarousel: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [index, setIndex] = useState(0);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getUsersInfo();
@@ -27,7 +33,6 @@ const TinderCarousel: React.FC = () => {
         toast.error("La respuesta del servidor no es válida.");
       }
     } catch (error) {
-      // Manejamos el error correctamente
       if (error instanceof Error) {
         toast.error(`Error al obtener usuarios: ${error.message}`);
       } else {
@@ -39,34 +44,43 @@ const TinderCarousel: React.FC = () => {
   const getCurrentUserId = async () => {
     const token = getToken();
     if (!token) throw new Error("No se pudo obtener el token de autenticación.");
-    // Decodificar el token para obtener el ID del usuario (esto depende de cómo esté estructurado tu token)
-    const user = JSON.parse(atob(token.split('.')[1])); // Esto puede variar según la codificación del token
+    const user = JSON.parse(atob(token.split('.')[1]));
     return user.id;
   };
-
-  if (users.length === 0) return <div>Cargando...</div>;
 
   const handleLike = async () => {
     const likedUserId = users[index].id;
     const userId = await getCurrentUserId();
-
+  
     try {
       await createLike(userId, likedUserId);
-      toast.success(`Le diste like a ${users[index].full_name}`); // Mensaje emergente de éxito
+  
+      // Crear una conversación si aún no existe
+      const { id } = await createConversation(userId, likedUserId);
+      setConversationId(id);
+      setSelectedUser(users[index]);
+  
+      toast.success(`Le diste like a ${users[index].full_name}`);
     } catch (error) {
-      // Manejamos el error correctamente
+      // Usamos un type assertion para tratar 'error' como un Error
       if (error instanceof Error) {
-        toast.error(`Error al dar like: ${error.message}`);
+        if (error.message === "Ya has dado like a este usuario.") {
+          toast.warning(error.message);
+        } else {
+          toast.error(`Error al dar like: ${error.message}`);
+        }
       } else {
         toast.error("Error desconocido al dar like.");
       }
     }
-
+  
     moveToNext();
   };
+  
+  
 
-  const handleDislike = async () => {
-    toast.info(`No te gustó ${users[index].full_name}`); // Mensaje emergente de información
+  const handleDislike = () => {
+    toast.info(`No te gustó ${users[index].full_name}`);
     moveToNext();
   };
 
@@ -74,7 +88,7 @@ const TinderCarousel: React.FC = () => {
     if (index < users.length - 1) {
       setIndex(index + 1);
     } else {
-      toast.info("No hay más usuarios."); // Mensaje emergente cuando no hay más usuarios
+      toast.info("No hay más usuarios.");
     }
   };
 
@@ -89,11 +103,11 @@ const TinderCarousel: React.FC = () => {
           users.map(user => (
             <Carousel.Item key={user.id}>
               <div className="card mx-auto" style={{ width: '18rem' }}>
-                <div className="card-img-top" style={{ 
-                  backgroundColor: 'grey', 
-                  height: '350px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div className="card-img-top" style={{
+                  backgroundColor: 'grey',
+                  height: '350px',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center'
                 }}>
                   <span style={{ color: 'white', fontSize: '24px' }}>Imagen</span>

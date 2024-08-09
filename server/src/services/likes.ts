@@ -1,9 +1,7 @@
-// likes.service.ts
 
 import conn from '../db';
 import { MAIN_DB_PREFIX } from '../keys';
 
-// Función para crear un like
 export const createLikeService = async (userId: number, likedUserId: number) => {
     const SQL = `INSERT INTO ${MAIN_DB_PREFIX}tc_likes (Id_UsuarioDioLike, Id_UsuarioRecibioLike, Fecha_Like) VALUES (?, ?, NOW());`;
 
@@ -16,7 +14,6 @@ export const createLikeService = async (userId: number, likedUserId: number) => 
     }
 };
 
-// Función para obtener los likes de un usuario
 export const getLikesService = async (userId: number): Promise<any[]> => {
     const SQL = `SELECT
         tu.id,
@@ -38,7 +35,6 @@ export const getLikesService = async (userId: number): Promise<any[]> => {
     }
 };
 
-// Función para verificar si un like ya existe
 export const checkLikeExistsService = async (userId: number, likedUserId: number): Promise<boolean> => {
     const SQL = `SELECT COUNT(*) AS count
     FROM ${MAIN_DB_PREFIX}tc_likes
